@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="image-util.js"></script>
+<script src="tf.js"></script>
+<script src="data.js"></script>
+<script src="gan.js"></script>
+</head>
+<body>
+</body>
+<script>
+
+const mnistData = new MnistData();
+
+async function loadMnist() {
+  console.log('Start loading...');
+  await mnistData.load();
+  console.log('Done loading...');
+}
+
+async function train(num=1000) {
+  console.log('starting....');
+
+  for (let i=0; i < num; i++) {
+    const real = mnistData.nextTrainBatch(BATCH);
+    const fake = seed();
+
+    const [dcost, gcost] = await trainBatch(real.xs, fake);
+    if (i % 50 === 0 || i === (num-1)) {
+      console.log('i', i);
+      console.log('discriminator cost', dcost.dataSync());
+      console.log('generator cost', gcost.dataSync());
+    }
+  }
+  console.log('done...');
+}
+
+async function sampleImage() {
+  await tf.nextFrame();
+  const options = {
+    width: SIZE,
+    height: SIZE 
+  };
+
+  const canvas = document.createElement('canvas');
+  canvas.width = options.width;
+  canvas.height = options.height;
+  const ctx = canvas.getContext('2d');
+  const imageData = new ImageData(options.width, options.height);
+  const data = gen(seed(1)).dataSync();
+  
+  // Undo tanh
+  for (let i=0; i < data.length; i++) {
+    data[i] = 0.5 * (data[i]+1.0);
+  }
+
+  const unflat = ImageUtil.unflatten(data, options);
+  for (let i=0; i < unflat.length; i++) {
+    imageData.data[i] = unflat[i];
+  }
+  ctx.putImageData(imageData, 0, 0);
+  document.body.appendChild(canvas);
+}
+
+async function run5000() {
+  for (let i=0; i < 5; i++) {
+    await train();
+    sampleImage();
+  }
+}
+
+
+async function start() {
+  await loadMnist();
+}
+
+</script>
+</html>
