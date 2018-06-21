@@ -3,6 +3,7 @@ const BATCH = 200;
 const SIZE = 28;
 const INPUT_SIZE = SIZE*SIZE;
 const SEED_SIZE = 40;
+const SEED_STD = 3.5; 
 const ONES = tf.ones([BATCH, 1]);
 const ONES_PRIME = tf.ones([BATCH, 1]).mul(tf.scalar(0.98));
 const ZEROS = tf.zeros([BATCH, 1]);
@@ -17,25 +18,25 @@ const gOptimizer = tf.train.sgd(GENERATOR_LEARNING_RATE);
 
 // Helper functions
 const varInitNormal = (shape, mean=0, std=0.1) => tf.variable(tf.randomNormal(shape, mean, std));
-const seed  = (s=BATCH) => tf.randomNormal([s, SEED_SIZE], 0, 3.0);
+const varLoad = (shape, data) => tf.variable(tf.tensor(shape, data));
+const seed  = (s=BATCH) => tf.randomNormal([s, SEED_SIZE], 0, SEED_STD);
 
 
 // Network arch for generator
-const G1w = varInitNormal([SEED_SIZE, 140]);
-const G1b = varInitNormal([140]);
-const G2w = varInitNormal([140, 80]);
-const G2b = varInitNormal([80]);
-const G3w = varInitNormal([80, INPUT_SIZE]);
-const G3b = varInitNormal([INPUT_SIZE]);
+let G1w = varInitNormal([SEED_SIZE, 140]);
+let G1b = varInitNormal([140]);
+let G2w = varInitNormal([140, 80]);
+let G2b = varInitNormal([80]);
+let G3w = varInitNormal([80, INPUT_SIZE]);
+let G3b = varInitNormal([INPUT_SIZE]);
 
 // Network arch for discriminator
-const D1w = varInitNormal([INPUT_SIZE, 200]);
-const D1b = varInitNormal([200]);
-const D2w = varInitNormal([200, 90]);
-const D2b = varInitNormal([90]);
-const D3w = varInitNormal([90, 1]);
-const D3b = varInitNormal([1]);
-
+let D1w = varInitNormal([INPUT_SIZE, 200]);
+let D1b = varInitNormal([200]);
+let D2w = varInitNormal([200, 90]);
+let D2b = varInitNormal([90]);
+let D3w = varInitNormal([90, 1]);
+let D3b = varInitNormal([1]);
 
 
 

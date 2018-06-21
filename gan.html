@@ -1,16 +1,61 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
+<title>MNIST GAN</title>
 <script src="image-util.js"></script>
 <script src="tf.js"></script>
 <script src="data.js"></script>
 <script src="gan.js"></script>
+<script src="model.js"></script>
+<link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body>
+  <section>
+    <h4>Simple MNIST GAN using TensorflowJS</h4>
+    <p>
+    An implementation of MNIST Generative Adversarial Network using lower level TensorflowJS functionalities. 
+    Both <em>Generator</em> and <em>Discriminator</em> uses densely connected layers - to keep architecture simple as possible, 
+    and to make training feasible on most browser/hardware combinations. With default hyper parameters the networks
+    start to converge and produce recognizable results after about 40 epochs.
+    </p>
+    <table>
+      <tr>
+        <td>Samples before epoch 20:</td>
+        <td><img src="sample-early.png" width="500px"></img></td>
+      </tr>
+      <tr>
+        <td>Samples around epoch 30:</td>
+        <td><img src="sample.png" width="500px"></img></td>
+      </tr>
+    </table>
+
+    <p>
+    Click <strong>Train</strong> to train for an additional 5 epochs. Click <strong>Load weights</strong> to restore 
+    pre-trained weights and biases for the <em>Generator</em>. Click <strong>Sample image</strong> to generate a sample output.
+    </p>
+    <button id="train" onclick="train()">Train</button>
+    <button onclick="loadCachedModel()">Load weights</button>
+    <button onclick="sampleImage()">Sample image</button>
+    <small>Debugging and stats are logged to the console</small>
+    <br>
+    <br>
+    <div id="samples-container"></div>
+    <br>
+  </section>
 </body>
 <script>
 
 const mnistData = new MnistData();
+
+function loadCachedModel() {
+  G1w = tf.variable(tf.tensor(GM.G1w.data).reshape(GM.G1w.shape));
+  G1b = tf.variable(tf.tensor(GM.G1b.data).reshape(GM.G1b.shape));
+  G2w = tf.variable(tf.tensor(GM.G2w.data).reshape(GM.G2w.shape));
+  G2b = tf.variable(tf.tensor(GM.G2b.data).reshape(GM.G2b.shape));
+  G3w = tf.variable(tf.tensor(GM.G3w.data).reshape(GM.G3w.shape));
+  G3b = tf.variable(tf.tensor(GM.G3b.data).reshape(GM.G3b.shape));
+}
 
 async function loadMnist() {
   console.log('Start loading...');
@@ -18,10 +63,12 @@ async function loadMnist() {
   console.log('Done loading...');
 }
 
-async function train(num=1000) {
+async function train(num=1375) {
   console.log('starting....');
+  document.querySelector('#train').disabled = true;
 
   for (let i=0; i < num; i++) {
+    document.querySelector('#train').innerHTML = i + '/' + num;
     const real = mnistData.nextTrainBatch(BATCH);
     const fake = seed();
 
@@ -32,6 +79,8 @@ async function train(num=1000) {
       console.log('generator cost', gcost.dataSync());
     }
   }
+  document.querySelector('#train').innerHTML = 'Train';
+  document.querySelector('#train').disabled = false;
   console.log('done...');
 }
 
@@ -50,29 +99,27 @@ async function sampleImage() {
   const data = gen(seed(1)).dataSync();
   
   // Undo tanh
+  /*
   for (let i=0; i < data.length; i++) {
     data[i] = 0.5 * (data[i]+1.0);
   }
+  */
 
   const unflat = ImageUtil.unflatten(data, options);
   for (let i=0; i < unflat.length; i++) {
     imageData.data[i] = unflat[i];
   }
   ctx.putImageData(imageData, 0, 0);
-  document.body.appendChild(canvas);
-}
-
-async function run5000() {
-  for (let i=0; i < 5; i++) {
-    await train();
-    sampleImage();
-  }
+  document.body.querySelector('#samples-container').appendChild(canvas);
 }
 
 
 async function start() {
   await loadMnist();
 }
+
+start();
+
 
 </script>
 </html>
