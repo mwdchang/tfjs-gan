@@ -8,13 +8,11 @@ const ONES = tf.ones([BATCH, 1]);
 const ONES_PRIME = tf.ones([BATCH, 1]).mul(tf.scalar(0.98));
 const ZEROS = tf.zeros([BATCH, 1]);
 
-
 // Generator and discrimantor params
-const DISCRIMINATOR_LEARNING_RATE = 0.006;
-const GENERATOR_LEARNING_RATE = 0.009;
+const DISCRIMINATOR_LEARNING_RATE = 0.025;
+const GENERATOR_LEARNING_RATE = 0.025;
 const dOptimizer = tf.train.sgd(DISCRIMINATOR_LEARNING_RATE);
 const gOptimizer = tf.train.sgd(GENERATOR_LEARNING_RATE);
-
 
 // Helper functions
 const varInitNormal = (shape, mean=0, std=0.1) => tf.variable(tf.randomNormal(shape, mean, std));
@@ -38,10 +36,8 @@ let D2b = varInitNormal([90]);
 let D3w = varInitNormal([90, 1]);
 let D3b = varInitNormal([1]);
 
-
-
 ////////////////////////////////////////////////////////////////////////////////
-// 
+// GAN functions
 ////////////////////////////////////////////////////////////////////////////////
 function gen(xs) {
   const l1 = tf.leakyRelu(xs.matMul(G1w).add(G1b));
@@ -62,24 +58,22 @@ function disFake(xs) {
   return disReal(gen(xs));
 }
 
-
-// Copied from tensorflow
+// Copied from tensorflow core
 function sigmoidCrossEntropyWithLogits(target, output) {
-    return tf.tidy(function () {
-        var maxOutput = tf.maximum(output, tf.zerosLike(output));
-        var outputXTarget = tf.mul(output, target);
-        var sigmoidOutput = tf.log(tf.add(tf.scalar(1.0), tf.exp(tf.neg(tf.abs(output)))));
-        var result = tf.add(tf.sub(maxOutput, outputXTarget), sigmoidOutput);
-        return result;
-    });
+  return tf.tidy(function () {
+    let maxOutput = tf.maximum(output, tf.zerosLike(output));
+    let outputXTarget = tf.mul(output, target);
+    let sigmoidOutput = tf.log(tf.add(tf.scalar(1.0), tf.exp(tf.neg(tf.abs(output)))));
+    let result = tf.add(tf.sub(maxOutput, outputXTarget), sigmoidOutput);
+    return result;
+  });
 }
 
-
+// Single batch training
 async function trainBatch(realBatch, fakeBatch) {
   const dcost = dOptimizer.minimize(() => {
     const [logitsReal, outputReal] = disReal(realBatch);
     const [logitsFake, outputFake] = disFake(fakeBatch);
-
 
     const lossReal = sigmoidCrossEntropyWithLogits(ONES_PRIME, logitsReal);
     const lossFake = sigmoidCrossEntropyWithLogits(ZEROS, logitsFake);
@@ -94,7 +88,7 @@ async function trainBatch(realBatch, fakeBatch) {
     return lossFake.mean();
   }, true, [G1w, G1b, G2w, G2b, G3w, G3b]);
   await tf.nextFrame();
+
   return [dcost, gcost];
 }
-
 

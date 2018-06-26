@@ -14,25 +14,29 @@
   <section>
     <h4>Simple MNIST GAN using TensorflowJS</h4>
     <p>
-    An implementation of MNIST Generative Adversarial Network using lower level TensorflowJS functionalities. 
-    Both <em>Generator</em> and <em>Discriminator</em> uses densely connected layers - to keep architecture simple as possible, 
-    and to make training feasible on most browser/hardware combinations. With default hyper parameters the networks
-    start to converge and produce recognizable results after about 40 epochs.
+    Hand-written digit generation using Generative Adversarial Network. A simple TensorflowJS implementation
+    that clocks in at less than 100 lines of code.
+
     </p>
-    <table>
+    <table style="margin-left:20px">
       <tr>
-        <td>Samples before epoch 20:</td>
-        <td><img src="sample-early.png" width="500px"></img></td>
+        <td>Samples in early stages:</td>
+        <td><img src="sample-early.png" height="30px"></img></td>
       </tr>
       <tr>
-        <td>Samples around epoch 30:</td>
-        <td><img src="sample.png" width="500px"></img></td>
+        <td>Samples in mid stages:</td>
+        <td><img src="sample-mid.png" height="30px"></img></td>
+      </tr>
+      <tr>
+        <td>Samples in later stages:</td>
+        <td><img src="sample-late.png" height="30px"></img></td>
       </tr>
     </table>
 
     <p>
-    Click <strong>Train</strong> to train for an additional 5 epochs. Click <strong>Load weights</strong> to restore 
-    pre-trained weights and biases for the <em>Generator</em>. Click <strong>Sample image</strong> to generate a sample output.
+    Click <strong>Train</strong> to train for (an additional 5) epochs. Click <strong>Load weights</strong> to restore 
+    pre-trained weights for the <em>Generator</em>. Click <strong>Sample image</strong> to generate a sample output. 
+    The network should start to converge after 15-20 epochs.
     </p>
     <button id="train" onclick="train()">Train</button>
     <button onclick="loadCachedModel()">Load weights</button>
