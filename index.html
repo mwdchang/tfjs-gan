@@ -47,6 +47,8 @@
     <button onclick="loadCachedModel()">Load weights</button>
     <button onclick="sampleImage()">Sample image</button>
     <br>
+    <p id="load-status"><br>Loading resources...this may take a few seconds<br></p>
+    <br>
     <br>
     <div id="samples-container"></div>
     <br>
@@ -68,8 +70,11 @@ function loadCachedModel() {
 
 async function loadMnist() {
   console.log('Start loading...');
+  document.querySelectorAll('button').forEach( d => d.disabled = true);
   await mnistData.load();
   console.log('Done loading...');
+  document.querySelectorAll('button').forEach(d => d.disabled = false);
+  document.querySelector('#load-status').style.display = 'none';
 }
 
 async function train(num=1375) {
